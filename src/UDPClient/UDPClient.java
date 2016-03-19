@@ -7,6 +7,7 @@ import java.util.*;
 
 public class UDPClient {
 	static DatagramSocket clientSocket;
+	static int packetSize = 1024;
 	static int port = 4214;
 	
 	public static void main(String args[]) throws Exception 
@@ -15,6 +16,19 @@ public class UDPClient {
 		InetAddress clientIP = InetAddress.getByName("127.0.0.1");
 		clientSocket = new DatagramSocket(port);
 		sendRequestPacket(clientIP,"thisname");
+		
+		
+		
+		// get data reply test
+		while (true)
+		{
+			byte[] receivedData = new byte[packetSize];
+			DatagramPacket receivedPacket = new DatagramPacket(receivedData, packetSize);
+			clientSocket.receive(receivedPacket);
+			
+			System.out.println( new String(receivedPacket.getData()));
+			
+		}
 		
 	}
 
