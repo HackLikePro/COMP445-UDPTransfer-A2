@@ -54,21 +54,31 @@ public class UDPServer {
 		// TODO Auto-generated method stub
 		boolean fileExsit = findFile(requestedFileName);
 		if (fileExsit) {
-			byte[] fileData = splitFile(requestedFileName);
-			DatagramPacket datapacket = new DatagramPacket(fileData, fileData.length, clientIP, clientPort);
+			
+			// byte [][] fileData if it is split
+			byte[][] fileData = splitFile(requestedFileName);
+			DatagramPacket datapacket = null;
+			
+			// use a loop here to send all the file Data 
+			 for (int i = 0 ; i < fileData.length; i++)
+			 { 	
+				  datapacket = new DatagramPacket(fileData[i], fileData[i].length, clientIP, clientPort);
+                  System.out.println("packet created");			 
+			 
+  
+			//DatagramPacket datapacket = new DatagramPacket(fileData, fileData.length, clientIP, clientPort);
 
 			// set serverSocket time out
 			serverSocket.setSoTimeout(timeout);
-			// Note: set a while true here for resend missing packet
+			// Note: set a while true here for resends missing packet
 			// set up ACK
 			byte[] ACK = new byte[packetSize];
 			DatagramPacket getAck = new DatagramPacket(ACK, ACK.length);
 			serverSocket.send(datapacket);
 
-			// Waiting for ACK reply
-			System.out.println("get ACK start");
+			// Send packet and waiting for ACK reply
+			System.out.println("Waitting ACK respond starts");
 			while (true) {
-
 				try {
 					serverSocket.receive(getAck);
 					String ack = new String(getAck.getData());
@@ -80,6 +90,8 @@ public class UDPServer {
 						System.out.println("got ACK");
 						break;
 					} else {
+						System.out.println("Wrong packet : resend");
+						serverSocket.send(datapacket);
 						continue;
 					}
 				} catch (SocketTimeoutException e) {
@@ -90,6 +102,8 @@ public class UDPServer {
 				}
 
 			}
+			
+		}
 
 		}
 
@@ -108,14 +122,36 @@ public class UDPServer {
 		}
 	}
 
-	private static byte[] splitFile(String requestedFileName) throws IOException {
+	private static byte[][] splitFile(String requestedFileName) throws IOException {
 		// TODO Auto-generated method stub
 		// Test: make all data one pack for testing wait and stop
+		int SequenceNum = 0; 
 		java.nio.file.Path path = Paths.get(requestedFileName);
-		byte[] data = Files.readAllBytes(path);
+		FileInputStream filestream = new FileInputStream(new File(requestedFileName));
 
+		byte[][] data =  new byte[2][1024];
+		for (int i = 0; i < data.length; i++) {
+			addheader(data, i, SequenceNum);
+			for (int j = 64; j < data[i].length; j++) {
+				data[i][j] = (byte) filestream.read();
+			}
+			SequenceNum = (SequenceNum + 1) % 2;
+		}
 		// Debug: File reading to byte
 		return data;
+	}
+
+	private static void addheader(byte[][] data, int i, int sequenceNum) {
+		// TODO Auto-generated method stub
+		int checkSumRan = (int) Math.random();
+	    String checkSumResult = "Debug" ;
+		String header = " CheckSum: " + checkSumRan + " CheckSumResult: " + checkSumResult + " SequenceNum: " + sequenceNum;
+		for(int k = 0 ; k<900 ; k++)
+		{
+			header = header.concat(" ");
+		}
+
+		data [i] = header.getBytes();
 	}
 
 	private static boolean findFile(String requestedFileName) {

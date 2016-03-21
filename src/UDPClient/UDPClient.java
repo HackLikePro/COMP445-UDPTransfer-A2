@@ -27,21 +27,57 @@ public class UDPClient {
 			byte[] receivedData = new byte[packetSize];
 			DatagramPacket receivedPacket = new DatagramPacket(receivedData, packetSize);
 			clientSocket.receive(receivedPacket);
-			
+			// Get server information from received packet
 			serverIP = receivedPacket.getAddress();
 			serverPort = receivedPacket.getPort();
 			
-			System.out.println( new String(receivedPacket.getData()));
-			sendACK(serverIP,serverPort);
+			System.out.println( new String(receivedPacket.getData()));	
 			
+			// check packet sequence
+			checkSequence(receivedPacket);
+			
+			// check if packet has error
+			if (checkSum(receivedPacket)) {
+				sendACK(serverIP, serverPort);
+				saveData(receivedPacket);
+			} else {
+				sendNCK(serverIP, serverPort);
+			}
+
 		}
+
+	}
+
+
+	private static void saveData(DatagramPacket receivedPacket) {
+		// TODO Auto-generated method stub
 		
 	}
+
+
+	private static void checkSequence(DatagramPacket receivedPacket) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	private static boolean checkSum(DatagramPacket receivedPacket) {
+		// TODO Auto-generated method stub
+		return true;
+	}
 	
+	private static void sendNCK(InetAddress serverIP, int serverPort) throws IOException {
+		// TODO Auto-generated method stub
+		String ACKrespon = "NCK";
+		byte[] ACK = ACKrespon.getBytes();
+		DatagramPacket ACKpacket = new DatagramPacket(ACK, ACK.length, serverIP, serverPort);
+		clientSocket.send(ACKpacket);
+		System.out.println("ACK packet sent" + new String(ACKpacket.getData()));
+	}
 
 	private static void sendACK(InetAddress serverIP, int serverPort) throws IOException {
 		// TODO Auto-generated method stub
-		String ACKrespon = "NCK";
+		String ACKrespon = "ACK";
 		byte[] ACK = ACKrespon.getBytes();
 		DatagramPacket ACKpacket = new DatagramPacket(ACK, ACK.length, serverIP, serverPort);
 		clientSocket.send(ACKpacket);
