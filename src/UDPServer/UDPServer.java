@@ -1,16 +1,11 @@
 package UDPServer;
 import java.io.*; 
 import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import javafx.scene.shape.Path;
 
 public class UDPServer {
 
 	final public static int packetSize = 1024;
-	final public static int headSize = 126;
-	final public static int timeout = 500000;
+	final public static int timeout = 500;
 	static DatagramSocket serverSocket;
 	
 	     	     
@@ -58,45 +53,12 @@ public class UDPServer {
 
 
 
-	private static void stopWait(InetAddress clientIP, int clientPort, String requestedFileName) throws IOException {
+	private static void stopWait(InetAddress clientIP, int clientPort, String requestedFileName) {
 		// TODO Auto-generated method stub
 		boolean fileExsit = findFile(requestedFileName);
 		if (fileExsit)
 		{
-			byte[] fileData = splitFile (requestedFileName);
-			DatagramPacket datapacket = new DatagramPacket(fileData, fileData.length, clientIP, clientPort);
-		    serverSocket.send(datapacket);
-		    
-		    //set serverSocket time out
-		    serverSocket.setSoTimeout(timeout);
-		    //set up ACK
-		    byte[] ACK = new byte [packetSize];
-		    DatagramPacket getAck = new DatagramPacket(ACK, ACK.length);
-		    
-		    // Waiting for ACK reply 
-		    while(true)
-		    {
-		    	System.out.println("get ACK start");
-		    	  try{
-		                serverSocket.receive(getAck);
-		                String a = new String(getAck.getData());
-		                System.out.println("\n-----FROM CLIENT-----\n" + a.trim());
-		                break;
-		             }
-		                catch(SocketTimeoutException e){
-		                   continue;
-		                }
-		    }
-		    
-		    // Process ACK packet
-		    
-		    String ack = new String(getAck.getData());
-		    if(checkACK(ack))
-		    {
-		    	//Debug: ACK
-		    	System.out.println("got ACK");
-		    }
-		    
+			byte[][] filePacket = splitFile (requestedFileName);
 		}
 		else
 		{
@@ -108,34 +70,9 @@ public class UDPServer {
 
 
 
-	
-
-
-
-
-	private static boolean checkACK(String ack) {
+	private static byte[][] splitFile(String requestedFileName) {
 		// TODO Auto-generated method stub
-		if(ack.equals("ACK"))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-
-
-
-	private static byte[] splitFile(String requestedFileName) throws IOException {
-		// TODO Auto-generated method stub
-		// Test: make all data one pack for testing wait and stop
-		java.nio.file.Path path =  Paths.get(requestedFileName);
-		byte [] data =  Files.readAllBytes(path);		
-		
-		//Debug: File reading to byte
-		return data;
+		return null;
 	}
 
 
@@ -143,7 +80,6 @@ public class UDPServer {
 
 	private static boolean findFile(String requestedFileName) {
 		// TODO Auto-generated method stub
-		File f = new File(requestedFileName);
-		return f.exists();
+		return false;
 	}
 }
