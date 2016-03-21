@@ -41,7 +41,7 @@ public class UDPClient {
 
 	private static void sendACK(InetAddress serverIP, int serverPort) throws IOException {
 		// TODO Auto-generated method stub
-		String ACKrespon = "ACK";
+		String ACKrespon = "NCK";
 		byte[] ACK = ACKrespon.getBytes();
 		DatagramPacket ACKpacket = new DatagramPacket(ACK, ACK.length, serverIP, serverPort);
 		clientSocket.send(ACKpacket);
