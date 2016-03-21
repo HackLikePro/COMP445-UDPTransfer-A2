@@ -10,8 +10,8 @@ import javafx.scene.shape.Path;
 public class UDPServer {
 
 	final public static int packetSize = 1024;
-	final public static int headSize = 126;
-	final public static int timeout = 10000;
+	final public static int headSize = 64;
+	final public static int timeout = 1000;
 	static DatagramSocket serverSocket;
 
 	public static void main(String args[]) throws IOException {
@@ -126,10 +126,11 @@ public class UDPServer {
 		// TODO Auto-generated method stub
 		// Test: make all data one pack for testing wait and stop
 		int SequenceNum = 0; 
+		int size = 22;
 		java.nio.file.Path path = Paths.get(requestedFileName);
 		FileInputStream filestream = new FileInputStream(new File(requestedFileName));
 
-		byte[][] data =  new byte[2][1024];
+		byte[][] data =  new byte[size][1024];
 		for (int i = 0; i < data.length; i++) {
 			addheader(data, i, SequenceNum);
 			for (int j = 64; j < data[i].length; j++) {
@@ -146,12 +147,19 @@ public class UDPServer {
 		int checkSumRan = (int) Math.random();
 	    String checkSumResult = "Debug" ;
 		String header = " CheckSum: " + checkSumRan + " CheckSumResult: " + checkSumResult + " SequenceNum: " + sequenceNum;
-		for(int k = 0 ; k<900 ; k++)
+		byte [] temp = header.getBytes();
+		byte [] temp2 = new byte [64];
+        
+        for(int k = 0 ; k<header.getBytes().length; k++)
+        {
+        	temp2[k] = temp [k];
+        }
+		
+		for(int k = 0 ; k<64 ; k++)
 		{
-			header = header.concat(" ");
+			data [i][k] = temp2[k];
 		}
 
-		data [i] = header.getBytes();
 	}
 
 	private static boolean findFile(String requestedFileName) {
